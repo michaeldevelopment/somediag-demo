@@ -1,0 +1,4 @@
+# La tabla de casos de relleno se mantiene con una fila por caso:
+# reformatearla la vuelve ilegible.
+src/data/mockCasos.ts
+dist

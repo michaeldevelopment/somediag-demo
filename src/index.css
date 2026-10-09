@@ -1,0 +1,123 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-marino: #0b1f3a;
+  --color-marino-700: #16355c;
+  --color-marino-300: #6b82a3;
+
+  --color-teal: #0fa3a3;
+  --color-teal-700: #0b7d7d;
+  --color-teal-300: #5cc6c6;
+
+  --color-menta: #e8f6f4;
+  --color-menta-200: #d2ece8;
+
+  --color-coral: #ff6b5a;
+  --color-coral-700: #d94e3e;
+  --color-coral-100: #ffe8e5;
+
+  --color-ambar: #e8a33d;
+  --color-ambar-100: #fdf1dd;
+
+  --color-verde: #1f9d55;
+  --color-verde-100: #e3f5ea;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    /* Reserva el canal de la barra de scroll: sin esto el encabezado salta
+       horizontalmente al cambiar entre pantallas largas y cortas. */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    margin: 0;
+    background-color: #f7fafa;
+    color: var(--color-marino);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+}
+
+@utility scrollbar-fina {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-marino-300) transparent;
+}
+
+/* --- Animaciones de entrada ------------------------------------------------
+   Discretas y cortas: acompañan el paso de la demo sin hacer esperar al
+   presentador. Se anulan si el sistema pide menos movimiento. */
+
+@keyframes entra-abajo {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes entra-arriba {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes aparece {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes entra-modal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility entra {
+  animation: entra-abajo 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility entra-desde-arriba {
+  animation: entra-arriba 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility aparece {
+  animation: aparece 0.3s ease-out both;
+}
+
+@utility entra-dialogo {
+  animation: entra-modal 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entra,
+  .entra-desde-arriba,
+  .aparece,
+  .entra-dialogo {
+    animation: none;
+  }
+}

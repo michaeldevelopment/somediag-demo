@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 560" width="420" height="560" role="img" aria-label="Orden médica ficticia de ejemplo">
+  <defs>
+    <linearGradient id="papel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f4f5f3"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="420" height="560" fill="url(#papel)"/>
+  <rect x="0.5" y="0.5" width="419" height="559" fill="none" stroke="#d8dde3"/>
+
+  <!-- Membrete -->
+  <rect x="0" y="0" width="420" height="68" fill="#0B1F3A"/>
+  <rect x="24" y="18" width="32" height="32" rx="7" fill="#0FA3A3"/>
+  <text x="34" y="42" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" fill="#ffffff">S</text>
+  <text x="68" y="32" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">IPS SALUD OCUPACIONAL ANDINA</text>
+  <text x="68" y="49" font-family="Inter, Arial, sans-serif" font-size="10" fill="#8aa0bd">NIT 900.XXX.XXX-X · Medellín · Tel. (604) 000 0000</text>
+
+  <text x="24" y="98" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#0B1F3A" letter-spacing="1.2">ORDEN DE SERVICIO DIAGNÓSTICO</text>
+  <line x1="24" y1="108" x2="396" y2="108" stroke="#d8dde3"/>
+
+  <!-- Datos del paciente -->
+  <text x="24" y="132" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">PACIENTE</text>
+  <text x="24" y="149" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#0B1F3A">LAURA GÓMEZ ARENAS</text>
+
+  <text x="24" y="176" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">DOCUMENTO</text>
+  <text x="24" y="192" font-family="Inter, Arial, sans-serif" font-size="12" fill="#0B1F3A">C.C. 1.036.774.812</text>
+
+  <text x="230" y="176" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">EDAD</text>
+  <text x="230" y="192" font-family="Inter, Arial, sans-serif" font-size="12" fill="#0B1F3A">31 años</text>
+
+  <text x="24" y="219" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">TELÉFONO</text>
+  <text x="24" y="235" font-family="Inter, Arial, sans-serif" font-size="12" fill="#0B1F3A">+57 310 775 2284</text>
+
+  <text x="230" y="219" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">FECHA</text>
+  <text x="230" y="235" font-family="Inter, Arial, sans-serif" font-size="12" fill="#0B1F3A">Hoy</text>
+
+  <text x="24" y="262" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">EMPRESA / CONVENIO</text>
+  <text x="24" y="278" font-family="Inter, Arial, sans-serif" font-size="12" fill="#0B1F3A">TRANSPORTES ANDINOS S.A.S.</text>
+  <text x="24" y="294" font-family="Inter, Arial, sans-serif" font-size="11" fill="#6b82a3">Convenio ocupacional · Examen periódico</text>
+
+  <line x1="24" y1="314" x2="396" y2="314" stroke="#d8dde3"/>
+
+  <!-- Estudio solicitado -->
+  <text x="24" y="338" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">ESTUDIO SOLICITADO</text>
+  <rect x="24" y="348" width="372" height="40" rx="6" fill="#E8F6F4"/>
+  <text x="36" y="373" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#0B7D7D">RX DE TÓRAX PA Y LATERAL</text>
+
+  <text x="24" y="412" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">IMPRESIÓN DIAGNÓSTICA</text>
+  <text x="24" y="428" font-family="Inter, Arial, sans-serif" font-size="12" fill="#0B1F3A">Z10.0 — Examen de salud ocupacional</text>
+
+  <text x="24" y="455" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">OBSERVACIONES</text>
+  <text x="24" y="471" font-family="Inter, Arial, sans-serif" font-size="11" fill="#0B1F3A">Paciente asintomática. No requiere preparación especial.</text>
+
+  <!-- Firma -->
+  <path d="M250 505 c14-16 22 10 34-4 s16 12 28-6 10 8 22 2" fill="none" stroke="#1d3f6e" stroke-width="1.6" stroke-linecap="round"/>
+  <line x1="240" y1="516" x2="396" y2="516" stroke="#9aa6b4"/>
+  <text x="240" y="530" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="600" fill="#0B1F3A">Dra. Ana María Duque</text>
+  <text x="240" y="543" font-family="Inter, Arial, sans-serif" font-size="9" fill="#6b82a3">Medicina del trabajo · R.M. 00000</text>
+
+  <!-- Marca de documento ficticio -->
+  <rect x="24" y="498" width="150" height="20" rx="4" fill="#FFE8E5"/>
+  <text x="32" y="512" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="600" fill="#D94E3E">DOCUMENTO FICTICIO · DEMO</text>
+</svg>
