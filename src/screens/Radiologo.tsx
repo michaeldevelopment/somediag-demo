@@ -198,7 +198,7 @@ function Lector({ caso, onLectura, onFirmar }: LectorProps) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,340px)_1fr]">
         <figure className="rounded-xl border border-marino/10 bg-marino p-3">
           <img
-            src="/radiografia.svg"
+            src={`${import.meta.env.BASE_URL}radiografia.svg`}
             alt="Esquema ilustrativo de radiografía de tórax, no corresponde a un paciente real"
             className="w-full rounded-lg"
           />
@@ -343,7 +343,7 @@ function ControlDictado({
 
       <audio
         ref={audioRef}
-        src="/dictado.mp3"
+        src={`${import.meta.env.BASE_URL}dictado.mp3`}
         preload="metadata"
         className="hidden"
       />
@@ -386,13 +386,13 @@ function useDictado(
 
   const palabras = useMemo(() => textoCompleto.split(' '), [textoCompleto])
 
-  // El servidor devuelve index.html con código 200 para los archivos que no
-  // existen, así que el evento `error` del <audio> no sirve para detectarlo:
-  // hay que mirar el tipo de contenido.
+  // Algunos servidores devuelven index.html con código 200 para los archivos
+  // que no existen, así que el evento `error` del <audio> no sirve para
+  // detectarlo: hay que mirar el tipo de contenido.
   useEffect(() => {
     let vigente = true
 
-    fetch('/dictado.mp3', { method: 'HEAD' })
+    fetch(`${import.meta.env.BASE_URL}dictado.mp3`, { method: 'HEAD' })
       .then((respuesta) => {
         const tipo = respuesta.headers.get('content-type') ?? ''
         if (vigente && respuesta.ok && tipo.startsWith('audio')) {

@@ -235,7 +235,7 @@ function BloqueOrden({
 
       <div className="entra mt-2 flex items-center gap-3 rounded-xl border border-marino/10 bg-white p-2.5">
         <img
-          src="/orden-medica.svg"
+          src={`${import.meta.env.BASE_URL}orden-medica.svg`}
           alt="Miniatura de la orden médica ficticia"
           className="h-20 w-[60px] shrink-0 rounded-md border border-marino/10 object-cover object-top"
         />
