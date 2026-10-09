@@ -2,6 +2,7 @@ import { EtiquetaDemo } from '@/components/EtiquetaDemo'
 import { ALTO_BARRA, PresenterBar } from '@/components/PresenterBar'
 import { CentroControl } from '@/screens/CentroControl'
 import { Entrega } from '@/screens/Entrega'
+import { Integraciones } from '@/screens/Integraciones'
 import { PreRegistro } from '@/screens/PreRegistro'
 import { Radiologo } from '@/screens/Radiologo'
 import { Recepcion } from '@/screens/Recepcion'
@@ -42,5 +43,7 @@ function Pantalla({ pestana }: { pestana: Pestana }) {
       return <Entrega />
     case 'centro-control':
       return <CentroControl />
+    case 'integraciones':
+      return <Integraciones />
   }
 }

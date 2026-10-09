@@ -2,6 +2,7 @@ import {
   ORDEN_ESTADOS,
   type Caso,
   type Estado,
+  type InfoAtencion,
   type Modalidad,
   type TipoPaciente,
 } from './tipos'
@@ -118,6 +119,33 @@ export function casoProtagonista(): Caso {
   }
 }
 
+/**
+ * Casos trabados por algo que no es el SLA. Va aparte de `RELLENO` porque la
+ * tupla de allá ya tiene doce posiciones y una más la vuelve ilegible.
+ */
+const ATENCION_POR_CASO: Record<string, InfoAtencion> = {
+  'SMD-0130': {
+    motivo: 'sin_radiologo_asignado',
+    responsable: 'Coordinación médica',
+    esperandoMin: 24,
+  },
+  'SMD-0137': {
+    motivo: 'orden_ilegible',
+    responsable: 'Recepción',
+    esperandoMin: 18,
+  },
+  'SMD-0140': {
+    motivo: 'dato_clinico_faltante',
+    responsable: 'Paciente · WhatsApp',
+    esperandoMin: 7,
+  },
+  'SMD-0144': {
+    motivo: 'pendiente_validacion',
+    responsable: 'Coordinación médica',
+    esperandoMin: 12,
+  },
+}
+
 export function casosIniciales(): Caso[] {
   const relleno = RELLENO.map<Caso>(
     ([
@@ -145,6 +173,7 @@ export function casosIniciales(): Caso[] {
       slaMin,
       creadoHace,
       historial: construirHistorial(estado, creadoHace),
+      atencion: ATENCION_POR_CASO[id],
     }),
   )
 

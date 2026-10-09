@@ -17,6 +17,25 @@ export interface EventoHistorial {
   hora: string
 }
 
+/**
+ * Por qué un caso aparece en "Requieren atención". `sla_vencido` se deriva en
+ * runtime del reloj del caso; los demás vienen marcados en los datos.
+ */
+export type MotivoAtencion =
+  | 'sla_vencido'
+  | 'orden_ilegible'
+  | 'dato_clinico_faltante'
+  | 'sin_radiologo_asignado'
+  | 'pendiente_validacion'
+
+export interface InfoAtencion {
+  motivo: MotivoAtencion
+  /** Quién tiene la pelota: un tablero sin dueño no es accionable. */
+  responsable: string
+  /** Minutos que el caso lleva esperando por este motivo. */
+  esperandoMin: number
+}
+
 export interface Caso {
   id: string
   paciente: { nombre: string; documento: string; telefono: string }
@@ -32,6 +51,8 @@ export interface Caso {
   creadoHace: number
   transcripcion?: string
   historial: EventoHistorial[]
+  /** Presente solo si el caso está bloqueado por algo distinto al SLA. */
+  atencion?: InfoAtencion
 }
 
 export interface Radiologo {
@@ -96,4 +117,12 @@ export const ETIQUETA_MODALIDAD: Record<Modalidad, string> = {
   RX: 'Rayos X',
   TAC: 'Tomografía',
   ECO: 'Ecografía',
+}
+
+export const ETIQUETA_MOTIVO: Record<MotivoAtencion, string> = {
+  sla_vencido: 'SLA vencido',
+  orden_ilegible: 'Orden médica ilegible',
+  dato_clinico_faltante: 'Dato clínico faltante',
+  sin_radiologo_asignado: 'Sin radiólogo asignado',
+  pendiente_validacion: 'Pendiente de validación',
 }

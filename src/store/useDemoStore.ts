@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import type { ModoProceso } from '@/data/metricas'
 import { CASO_PROTAGONISTA_ID, casosIniciales } from '@/data/mockCasos'
 import {
   MINUTOS_POR_ESTADO,
@@ -18,6 +19,7 @@ export type Pestana =
   | 'radiologo'
   | 'entrega'
   | 'centro-control'
+  | 'integraciones'
 
 export const PESTANAS: { id: Pestana; etiqueta: string }[] = [
   { id: 'whatsapp', etiqueta: 'WhatsApp' },
@@ -26,6 +28,7 @@ export const PESTANAS: { id: Pestana; etiqueta: string }[] = [
   { id: 'radiologo', etiqueta: 'Radiólogo' },
   { id: 'entrega', etiqueta: 'Entrega' },
   { id: 'centro-control', etiqueta: 'Centro de control' },
+  { id: 'integraciones', etiqueta: 'Integraciones' },
 ]
 
 /**
@@ -73,12 +76,15 @@ interface EstadoDemo {
   pestana: Pestana
   /** Caso abierto en el panel lateral del Centro de control. */
   casoSeleccionadoId: string | null
+  /** Vista activa de la comparación de proceso en el Centro de control. */
+  comparador: ModoProceso
   flujo: Flujo
 }
 
 interface AccionesDemo {
   irA: (pestana: Pestana) => void
   seleccionarCaso: (id: string | null) => void
+  verComparador: (comparador: ModoProceso) => void
   marcarFlujo: (parche: Partial<Flujo>) => void
   /** Fija el estado de un caso y le agrega los eventos intermedios al historial. */
   avanzarCaso: (id: string, estado: Estado) => void
@@ -96,6 +102,7 @@ function estadoInicial(): EstadoDemo {
     casos: casosIniciales(),
     pestana: 'whatsapp',
     casoSeleccionadoId: null,
+    comparador: 'programa',
     flujo: { ...FLUJO_INICIAL },
   }
 }
@@ -108,6 +115,8 @@ export const useDemoStore = create<StoreDemo>()(
       irA: (pestana) => set({ pestana }),
 
       seleccionarCaso: (casoSeleccionadoId) => set({ casoSeleccionadoId }),
+
+      verComparador: (comparador) => set({ comparador }),
 
       marcarFlujo: (parche) =>
         set((s) => ({ flujo: { ...s.flujo, ...parche } })),
@@ -159,7 +168,15 @@ export const useDemoStore = create<StoreDemo>()(
 
       reiniciarDemo: () => set(estadoInicial()),
     }),
-    { name: 'demo-somediag' },
+    {
+      name: 'demo-somediag',
+      // Un navegador que ya corrió la demo tiene guardada la forma anterior
+      // del estado, sin `comparador` ni `atencion` en los casos. Rehidratarla
+      // rompería el Centro de control, así que al subir de versión se
+      // descarta: aquí no hay nada que valga la pena conservar.
+      version: 2,
+      migrate: () => estadoInicial(),
+    },
   ),
 )
 

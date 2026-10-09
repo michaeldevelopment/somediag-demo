@@ -14,22 +14,29 @@ import {
   YAxis,
 } from 'recharts'
 
+import { ComparadorProceso } from '@/components/ComparadorProceso'
 import { KpiCard } from '@/components/KpiCard'
+import { PanelContencion } from '@/components/PanelContencion'
 import { SlaBadge } from '@/components/SlaBadge'
 import { StatusPill } from '@/components/StatusPill'
 import { CASO_PROTAGONISTA_ID } from '@/data/mockCasos'
 import {
   COLOR_MODALIDAD,
+  COLOR_SERIE_MANUAL,
   COLOR_SERIE_TIEMPO,
-  TIEMPOS_POR_ETAPA,
+  cuelloDeBotella,
+  serieTiempos,
+  type ModoProceso,
 } from '@/data/metricas'
 import {
   ETIQUETA_ESTADO,
   ETIQUETA_MODALIDAD,
+  ETIQUETA_MOTIVO,
   ETIQUETA_TIPO,
   ORDEN_ESTADOS,
   type Caso,
   type Modalidad,
+  type MotivoAtencion,
 } from '@/data/tipos'
 import { infoSla } from '@/lib/sla'
 import { cn, duracion } from '@/lib/utils'
@@ -42,11 +49,10 @@ export function CentroControl() {
   const seleccionado = useDemoStore(selCasoSeleccionado)
   const seleccionarCaso = useDemoStore((s) => s.seleccionarCaso)
 
+  const comparador = useDemoStore((s) => s.comparador)
+
   const kpis = useMemo(() => calcularKpis(casos), [casos])
-  const vencidos = useMemo(
-    () => casos.filter((c) => infoSla(c).nivel === 'vencido'),
-    [casos],
-  )
+  const atencion = useMemo(() => calcularAtencion(casos), [casos])
   const porModalidad = useMemo(
     () =>
       MODALIDADES.map((m) => ({
@@ -65,6 +71,8 @@ export function CentroControl() {
           Operación del día en vivo. Se actualiza con cada paso de la demo.
         </p>
       </header>
+
+      <ComparadorProceso />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
@@ -94,10 +102,11 @@ export function CentroControl() {
         />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <GraficaModalidad datos={porModalidad} total={casos.length} />
-        <GraficaTiempos />
-        <PanelAtencion casos={vencidos} onAbrir={seleccionarCaso} />
+        <GraficaTiempos modo={comparador} />
+        <PanelAtencion items={atencion} onAbrir={seleccionarCaso} />
+        <PanelContencion />
       </section>
 
       <Tablero casos={casos} onAbrir={seleccionarCaso} />
@@ -194,17 +203,22 @@ function GraficaModalidad({
   )
 }
 
-function GraficaTiempos() {
+function GraficaTiempos({ modo }: { modo: ModoProceso }) {
+  const manual = modo === 'actual'
+  const cuello = cuelloDeBotella(modo)
+
   return (
     <article className="rounded-xl border border-marino/10 bg-white p-5">
       <h2 className="text-sm font-semibold">Tiempo promedio por etapa</h2>
-      <p className="text-[12px] text-marino-300">Minutos, promedio del mes</p>
+      <p className="text-[12px] text-marino-300">
+        Minutos · {manual ? 'proceso actual' : 'con el programa'}
+      </p>
 
       <div className="mt-2 h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={TIEMPOS_POR_ETAPA}
-            margin={{ top: 8, right: 4, left: -16, bottom: 0 }}
+            data={serieTiempos(modo)}
+            margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
           >
             <CartesianGrid
               vertical={false}
@@ -216,12 +230,19 @@ function GraficaTiempos() {
               tickLine={false}
               axisLine={false}
               interval={0}
-              tick={{ fontSize: 11, fill: '#6b82a3' }}
+              tickMargin={6}
+              // La tarjeta comparte fila con otras tres: a este ancho
+              // "Pre-registro" se monta encima de "Admisión".
+              tickFormatter={(etapa: string) =>
+                etapa === 'Pre-registro' ? 'Pre-reg.' : etapa
+              }
+              tick={{ fontSize: 10, fill: '#6b82a3' }}
             />
             <YAxis
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 11, fill: '#6b82a3' }}
+              width={28}
+              tick={{ fontSize: 10, fill: '#6b82a3' }}
             />
             <Tooltip
               cursor={{ fill: '#0b1f3a', fillOpacity: 0.04 }}
@@ -230,13 +251,22 @@ function GraficaTiempos() {
             />
             <Bar
               dataKey="minutos"
-              fill={COLOR_SERIE_TIEMPO}
+              fill={manual ? COLOR_SERIE_MANUAL : COLOR_SERIE_TIEMPO}
               radius={[4, 4, 0, 0]}
               maxBarSize={28}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {/* La conclusión escrita: el cuello de botella se mueve con el modo.
+          Hoy está en la entrega, que es papeleo; con el programa pasa a la
+          lectura médica, que es el trabajo que sí debe tomar tiempo. */}
+      <p className="mt-2 rounded-lg bg-ambar-100 px-3 py-2 text-[12px] leading-relaxed text-marino-700">
+        <span className="font-semibold">Cuello de botella:</span>{' '}
+        {cuello.etapa.toLowerCase()} concentra el {cuello.porcentaje}% del
+        proceso ({duracion(cuello.minutos)}).
+      </p>
     </article>
   )
 }
@@ -284,48 +314,131 @@ const ESTILO_TOOLTIP = {
 
 // --- Requieren atención -----------------------------------------------------
 
+interface ItemAtencion {
+  caso: Caso
+  motivo: MotivoAtencion
+  /** Quién tiene que mover el caso para desbloquearlo. */
+  responsable: string
+  esperandoMin: number
+}
+
+/**
+ * Un caso entra al panel por SLA vencido —que se deriva del reloj— o porque
+ * viene marcado con otro motivo en los datos. El SLA manda si se dan los dos.
+ */
+function calcularAtencion(casos: Caso[]): ItemAtencion[] {
+  const items = casos.flatMap<ItemAtencion>((caso) => {
+    const { nivel, restanteMin } = infoSla(caso)
+
+    if (nivel === 'vencido') {
+      return [
+        {
+          caso,
+          motivo: 'sla_vencido',
+          responsable: caso.radiologo ?? 'Coordinación médica',
+          esperandoMin: -restanteMin,
+        },
+      ]
+    }
+
+    return caso.atencion ? [{ caso, ...caso.atencion }] : []
+  })
+
+  // Vencidos primero; dentro de cada grupo, el que lleva más esperando.
+  return items.sort((a, b) => {
+    const prioridad = (m: MotivoAtencion) => (m === 'sla_vencido' ? 0 : 1)
+    return (
+      prioridad(a.motivo) - prioridad(b.motivo) ||
+      b.esperandoMin - a.esperandoMin
+    )
+  })
+}
+
 function PanelAtencion({
-  casos,
+  items,
   onAbrir,
 }: {
-  casos: Caso[]
+  items: ItemAtencion[]
   onAbrir: (id: string) => void
 }) {
   return (
-    <article className="rounded-xl border border-coral/40 bg-coral-100/40 p-5">
+    <article className="flex flex-col rounded-xl border border-coral/40 bg-coral-100/40 p-5">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-coral-700">
         <AlertTriangle className="size-4" aria-hidden />
         Requieren atención
       </h2>
-      <p className="text-[12px] text-marino-300">Casos con el SLA vencido</p>
+      <p className="text-[12px] text-marino-300">
+        Priorizados por SLA, datos faltantes o validación
+      </p>
 
-      {casos.length === 0 ? (
-        <p className="mt-4 text-sm text-marino-300">Ningún caso vencido.</p>
+      {items.length === 0 ? (
+        <p className="mt-4 text-sm text-marino-300">
+          Ningún caso bloqueado ahora mismo.
+        </p>
       ) : (
-        <ul className="mt-3 space-y-2">
-          {casos.map((caso) => (
-            <li key={caso.id}>
-              <button
-                type="button"
-                onClick={() => onAbrir(caso.id)}
-                className="w-full rounded-lg border border-coral/30 bg-white p-3 text-left transition hover:border-coral"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[12px] font-semibold">{caso.id}</span>
-                  <SlaBadge caso={caso} compacto />
-                </div>
-                <p className="mt-0.5 truncate text-[13px] font-medium">
-                  {caso.paciente.nombre}
-                </p>
-                <p className="truncate text-[11px] text-marino-300">
-                  {caso.estudio}
-                </p>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          {/* La lista crece con la demo; el panel no. */}
+          <ul className="scrollbar-fina mt-3 max-h-[300px] space-y-2 overflow-y-auto pr-1">
+            {items.map((item) => (
+              <li key={item.caso.id}>
+                <FilaAtencion item={item} onAbrir={onAbrir} />
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-3 text-[11px] text-marino-300">
+            {items.length} casos esperando una acción.
+          </p>
+        </>
       )}
     </article>
+  )
+}
+
+function FilaAtencion({
+  item,
+  onAbrir,
+}: {
+  item: ItemAtencion
+  onAbrir: (id: string) => void
+}) {
+  const { caso, motivo, responsable, esperandoMin } = item
+  const vencido = motivo === 'sla_vencido'
+
+  return (
+    <button
+      type="button"
+      onClick={() => onAbrir(caso.id)}
+      className="w-full rounded-lg border border-coral/30 bg-white p-3 text-left transition hover:border-coral"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[12px] font-semibold tabular-nums">
+          {caso.id}
+        </span>
+        <span
+          className={cn(
+            'rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap',
+            vencido
+              ? 'bg-coral-100 text-coral-700'
+              : 'bg-ambar-100 text-ambar',
+          )}
+        >
+          {ETIQUETA_MOTIVO[motivo]}
+        </span>
+      </div>
+
+      <p className="mt-0.5 truncate text-[13px] font-medium">
+        {caso.paciente.nombre}
+      </p>
+
+      {/* Sin responsable el tablero solo informa; con él, alguien actúa. */}
+      <p className="mt-1 flex items-center justify-between gap-2 text-[11px] text-marino-300">
+        <span className="truncate">{responsable}</span>
+        <span className="shrink-0 tabular-nums">
+          {duracion(esperandoMin)}
+        </span>
+      </p>
+    </button>
   )
 }
 

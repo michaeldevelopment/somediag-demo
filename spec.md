@@ -18,7 +18,7 @@ Demo de ventas, solo frontend, con datos ficticios. Muestra en ~7 minutos el rec
 - Todo el texto en español de Colombia.
 
 ## Navegación (barra de presentador fija arriba)
-Pestañas: WhatsApp · Pre-registro · Recepción · Radiólogo · Entrega · Centro de control
+Pestañas: WhatsApp · Pre-registro · Recepción · Radiólogo · Entrega · Centro de control · Integraciones
 + botón "Reiniciar demo" (restaura el estado inicial).
 
 ## Modelo de datos
@@ -86,21 +86,36 @@ interface Caso {
 - ✅ Muestra el informe con el membrete de SOMEDIAG y la firma del radiólogo. Estado `resultado_entregado`.
 
 ### 6. Centro de control (escritorio)
-- KPIs arriba: pacientes de hoy, en proceso, SLA vencidos, tiempo promedio hasta la entrega.
+- Franja "Comparación de proceso" con toggle **Proceso actual ↔ Con el programa**. Tres cifras que voltean: gestión administrativa (1 h 6 min → 6 min), proceso total (2 h → 42 min) y digitación del mismo dato (3 veces → 0). Las dos primeras se derivan de `TIEMPOS_POR_ETAPA`, no se escriben aparte. Pie con los supuestos a la vista.
+- Los 4 KPIs **no** cambian con el toggle: siguen siendo datos vivos del tablero (pacientes de hoy, en proceso, SLA vencidos, tiempo promedio hasta la entrega).
 - Tablero tipo kanban con columnas por estado. El caso de Laura va resaltado y se mueve de columna según avanza la demo.
-- Panel "Requieren atención": casos con SLA vencido en coral.
-- 2 gráficas: estudios por modalidad (dona) y tiempo por etapa (barras).
+- Panel "Requieren atención": un caso entra por SLA vencido o por un motivo marcado en los datos (orden ilegible, dato clínico faltante, sin radiólogo, pendiente de validación). Cada fila muestra **motivo, responsable y minutos esperando**; los vencidos van primero.
+- Panel "Atención inicial": cuánto resuelve el agente solo (41 contactos → 33 orientados → 26 pre-registros → 8 escalados) y el mix de canal. Las cifras van a la escala de la demo para que cuadren con el KPI "Pacientes de hoy".
+- 2 gráficas: estudios por modalidad (dona) y tiempo por etapa (barras, con la serie del modo activo).
+- La gráfica de etapas cierra con el **cuello de botella calculado**: hoy la entrega (38%), con el programa la lectura médica (52%). Que se mueva es el argumento.
 - Clic en un caso → panel lateral con su historial de estados.
 - ✅ Refleja en vivo los cambios hechos en las otras pantallas.
 
+### 7. Integraciones (escritorio)
+- 5 puntos con estado de madurez honesto: Manager Clinic (por validar), Worklist DICOM y PACS (en levantamiento), WhatsApp Business API (propuesto), portal de empresas (por definir).
+- Cada tarjeta declara intercambio y alcance. Arriba, la tira del recorrido de los datos; abajo, los controles (decisión clínica humana, auditoría por evento, permisos por perfil, datos cifrados).
+- ✅ Aviso al pie: ninguna integración está conectada; el alcance real depende de validar APIs, versiones y mecanismos de cada sistema.
+
 ## Fuera de alcance
 Login, roles reales, administración, integraciones reales, IA real, manejo de errores, tests, portal de empresas.
+
+Pendientes detectados al comparar con la plataforma de Wise, todavía sin
+construir: caso de negocio en pesos, entrega a la empresa remitente además del
+paciente, un caso donde la IA se equivoca y alguien corrige, y devolución del
+informe con observaciones desde el radiólogo.
 
 ## Estructura
 ```
 src/
   data/        mockCasos.ts, radiologos.ts, chatScript.ts
   store/       useDemoStore.ts
-  components/  PresenterBar, PhoneFrame, SlaBadge, StatusPill, KpiCard
-  screens/     WhatsApp, PreRegistro, Recepcion, Radiologo, Entrega, CentroControl
+  components/  PresenterBar, PhoneFrame, SlaBadge, StatusPill, KpiCard,
+               ComparadorProceso, PanelContencion
+  screens/     WhatsApp, PreRegistro, Recepcion, Radiologo, Entrega,
+               CentroControl, Integraciones
 ```

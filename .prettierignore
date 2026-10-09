@@ -2,3 +2,6 @@
 # reformatearla la vuelve ilegible.
 src/data/mockCasos.ts
 dist
+
+# Build versionado para GitHub Pages.
+docs
